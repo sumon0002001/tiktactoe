@@ -1,9 +1,9 @@
 import React from 'react'
 
-const Strike = () => {
+const Strike = ({strikeClass}) => {
     return (
-        <div>
-            Strike
+        <div className={`strike ${strikeClass}`}>
+            
         </div>
     )
 }
