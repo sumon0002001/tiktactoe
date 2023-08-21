@@ -1,5 +1,8 @@
 import React,{useState,useEffect} from 'react';
 import Board from './Board';
+import GameOver from './GameOver';
+import GameState from './GameState';
+import Reset from './Reset';
 
 const PLAYER_X = "X";
 const PLAYER_O = "O";
@@ -21,7 +24,7 @@ const winningCombinations = [
   ];
 
 
-const checkWinner = (tile, setStrikeClass) => {
+const checkWinner = (tile, setStrikeClass, setGameState) => {
     for (const {combo, strikeClass} of winningCombinations) {
         const tileValue1 = tile[combo[0]];
         const tileValue2 = tile[combo[1]];
@@ -33,8 +36,19 @@ const checkWinner = (tile, setStrikeClass) => {
             tileValue1 === tileValue3
           ){
               setStrikeClass(strikeClass)
+              if(tileValue1 === PLAYER_X){
+                  setGameState(GameState.playerXWins)
+              } else {
+                  setGameState(GameState.playerOWins)
+              }
+              return;
           }
 
+    }
+
+    const areAllTilesFilledIn = tile.every((tile) => tile !== null);
+    if(areAllTilesFilledIn) {
+        setGameState(GameState.draw);
     }
 }
 
@@ -42,8 +56,13 @@ const TicTacToe = () => {
     const[tile, setTile] = useState(Array(9).fill(null))
     const [playerTurn, setPlayerTurn] = useState(PLAYER_X);
     const [strikeClass, setStrikeClass] = useState();
+    const [gameState, setGameState ] = useState(GameState.inProgress);
 
     const handleTileClick = (index) => {
+        if (gameState !== GameState.inProgress){
+            return
+        }
+
         if(tile[index] !== null) {
             return
         }
@@ -58,8 +77,14 @@ const TicTacToe = () => {
 
     }
 
+    const handleReset = () => {
+      setTile(Array(9).fill(null));
+      setStrikeClass()
+      setGameState(GameState.inProgress)
+    }
+
     useEffect(() => {
-        checkWinner(tile, setStrikeClass)
+        checkWinner(tile, setStrikeClass, setGameState)
 
     }, [tile])
 
@@ -67,6 +92,8 @@ const TicTacToe = () => {
         <div>
             <h1>Tic Tac Toe</h1>
             <Board strikeClass = {strikeClass} playerTurn={playerTurn} tile={tile} onTileClick= {handleTileClick} />
+            <GameOver gameState= {gameState} />
+            <Reset gameState= {gameState} onReset={handleReset}/>
         </div>
     )
 }
